@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Get started with SceneView - Create a 3D map</title>
+<link rel="stylesheet" href="https://js.arcgis.com/4.0/esri/css/main.css">
+<style>
+  html, body, #viewDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+</style>
+<script src="https://js.arcgis.com/4.0/"></script>
+<script>
+	require([
+	  "esri/Map",
+	  "esri/views/SceneView",
+	  "esri/Camera", 
+	  "esri/Ground", 
+	  "esri/layers/ElevationLayer",
+	  "dojo/domReady!"
+	], function(Map, SceneView, Camera, Ground, ElevationLayer) {
+		// Create a map with the world elevation layer overlaid by a custom elevation layer
+		var worldElevation = ElevationLayer({
+		  url: "http://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+		});
+	    var map = new Map({
+			basemap: "topo",
+			//ground: "world-elevation"
+			ground: new Ground({
+				layers: [ worldElevation ]
+			})
+		});
+		
+		var view = new SceneView({
+			container: "viewDiv",  // Reference to the DOM node that will contain the view
+			map: map,  // References the map object created in step 3
+			scale: 50000000,          // Sets the initial scale to 1:50,000,000
+			center: [-101.17, 21.78]  // Sets the center point of view with lon/lat
+		});
+		
+		// Initialize the view with a specific camera
+		var cam = new Camera({
+		  heading: 90, // face due east
+		  tilt: 45, // looking from a bird's eye view
+		  position: {
+			latitude: 38,
+			longitude: -122,
+			z: 20000,
+			spatialReference: { wkid: 3857 }
+		  }
+		});
+
+		view.camera = cam;
+	});
+</script>
+</head>
+</html>
+	<div id="viewDiv"></div>
+</html>
