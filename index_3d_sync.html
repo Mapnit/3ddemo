@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>LOGIC Map3D Demo</title>
+  <style>
+    html,body,#mapViewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      z-index: -1;
+    }
+    
+    #sceneViewDiv {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 800px;
+      height: 600px;
+      border: 1px solid black;
+      z-index: 1;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.0/esri/css/main.css">
+  <script src="https://js.arcgis.com/4.0/"></script>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/views/MapView",
+      "esri/core/watchUtils",
+      "dojo/dom",
+      "dojo/promise/all",
+      "dojo/domReady!"
+    ], function(Map, SceneView, MapView, watchUtils, dom, all) {
+	
+	  // Define the starting location
+	  var focusLoc = [7, 46]; 
+	  	
+	  // Create 2d map for the main view
+	  var mainMap = new Map({
+        basemap: "topo"
+      });
+	  
+	  // Create 3d map for the scene view
+	  var sceneMap = new Map({
+        basemap: "topo",
+        ground: "world-elevation"
+      });
+
+      // Create the SceneView for 3D map
+      var sceneView = new SceneView({
+        container: "sceneViewDiv",
+        map: sceneMap,
+		camera: {
+          position: focusLoc,
+          heading: 35,
+          tilt: 60
+        }
+      });
+	  
+      // Create the MapView for main 2D map
+      var mapView = new MapView({
+        container: "mapViewDiv",
+        map: mainMap
+      });
+
+      mapView.then(function() {
+        mapView.goTo({
+          center: focusLoc,
+          zoom: 4
+        });
+		
+		// Update the scene view when the main view becomes stationary
+        watchUtils.when(mapView, "stationary", updateSceneView);
+		
+		function updateSceneView() {
+          // Animate the MapView to a zoomed-out scale so we get a nice scene view.
+          // We use the "progress" callback of the goTo promise to update
+          // the overview extent while animating
+		  if (sceneView) {
+			  var scaleForSceneView = mapView.scale * Math.min(
+				  sceneView.width / mapView.width,
+				  sceneView.height / mapView.height) / 100; 
+			  console.debug("scaleForSceneView: " + scaleForSceneView); 
+			  sceneView.goTo({
+				center: mapView.center,
+				scale: scaleForSceneView,
+				heading: sceneView.camera.heading,
+				tilt: sceneView.camera.tilt
+			  }, {
+				animate: true
+			  });
+		  }
+        }
+      });
+
+	});
+  </script>
+</head>
+
+<body>
+  <div id="mapViewDiv"></div>
+  <div id="sceneViewDiv"></div>
+</body>
+</html>
