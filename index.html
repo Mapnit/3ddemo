@@ -200,6 +200,26 @@
       // Add the home widget to the top left corner of the view
       mapView.ui.add(homeBtn, "top-left");
 	  
+	  // Create the LOGIC logo tag
+	  var logoImg = domConstruct.create("img", {
+        id: "logo-LOGIC-image",
+        src: "http://logicsolutionsgroup.com/images/Logic_Logo.png",
+        title: "LOGIC Solutions Group",
+		width: 136,
+		height: 77
+      }),
+	  logoLink = domConstruct.create("a", {
+        id: "logo-LOGIC-link",
+	    href: "http://logicsolutionsgroup.com/"
+	  }); 
+	  
+	  domConstruct.place(logoImg, logoLink); 
+	  
+	  // Add the LOGIC logo to the bottom left corner of the view
+      mapView.ui.add(logoLink, {
+        position: "bottom-left"
+      });
+	  
 	  // Define the action handler in the mapView popup 
 	  mapView.popup.on("trigger-action", function(evt) {
         if (evt.action.id === "show-subsurface-view") {
