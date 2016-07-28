@@ -364,7 +364,7 @@
 	  }	  
 	  
 	  // Highlight deviation paths on the scene view
-	  function highlightWellOnSceneView(f, sv) {
+	  function highlightWellOnSceneView(f, sceneView) {
 	    console.debug("highlightWellOnSceneView"); 
 		var sizeFactor = 0.3048,
 			zOffset = 1000; 
@@ -387,7 +387,7 @@
           symbol: lineSymbol
         });
 		
-		var graphicsLayer = sv.map.findLayerById("wellPathGraphicsLayer"); 
+		var graphicsLayer = sceneView.map.findLayerById("wellPathGraphicsLayer"); 
 		if (graphicsLayer) {
 		  graphicsLayer.removeAll(); 
 		  graphicsLayer.add(wellPathGraphic);
