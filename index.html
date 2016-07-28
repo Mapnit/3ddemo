@@ -63,7 +63,7 @@
 		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, 
 		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D, 
 		PathSymbol3DLayer, LineSymbol3D, 
-		Home, dom, domStyle, all) {
+		Compass, Home, Search, dom, domConstruct, domStyle, all) {
 	  
 	  // Define the feature layer URLs
       var wellsUrl =
@@ -226,6 +226,36 @@
 	  // Add the LOGIC logo to the bottom left corner of the view
       mapView.ui.add(logoLink, {
         position: "bottom-left"
+      });
+	  
+	  // Create the Search Widget on wells
+	  var searchWidget = new Search({
+        view: mapView,
+        allPlaceholder: "Well API or Operator",
+        sources: [{
+          featureLayer: wellsSurfaceLyr2D,
+          searchFields: ["API_NUMBER", "CURR_OPERATOR"],
+          suggestionTemplate: "{API_NUMBER}, Operated by {CURR_OPERATOR}",
+          exactMatch: false,
+          outFields: ["*"],
+          name: "Well",
+          placeholder: "example: 15-077-21213",
+		  resultSymbol: new SimpleMarkerSymbol({
+            size: 6,
+		    color: [0, 255, 255],
+            outline: { // autocasts as new SimpleLineSymbol()
+              color: [0, 255, 255, 0.4],
+              width: 2
+            }
+          })
+        }]
+      });
+
+      searchWidget.startup();
+
+      // Add the search widget to the top left corner of the view
+      mapView.ui.add(searchWidget, {
+        position: "top-right"
       });
 	  
 	  // Define the action handler in the mapView popup 
