@@ -364,7 +364,6 @@
 	  function showDeviationView(f) {
 		if (f) {
 		  console.debug("show-subsurface-view: " + f.geometry); 
-		  domStyle.set("sceneViewDiv", "visibility", "visible");
 		  // highlight features
 		  highlightWellOnSceneView(f, sceneView); 
 		  highlightWellOnMapView(f, mapView); 
@@ -379,6 +378,7 @@
 				animate: true
 			  });
 		  });
+		  domStyle.set("sceneViewDiv", "visibility", "visible");
 		} else {
 		  console.warn("no feature was selected"); 
 		} 
