@@ -200,6 +200,14 @@
       // Add the home widget to the top left corner of the view
       mapView.ui.add(homeBtn, "top-left");
 	  
+	  // Create a Compass widget
+	  var compassWidget = new Compass({
+	    view: mapView
+	  });
+
+	  // Add the Compass widget to the top left corner of the view
+	  mapView.ui.add(compassWidget, "top-left");
+	  
 	  // Create the LOGIC logo tag
 	  var logoImg = domConstruct.create("img", {
         id: "logo-LOGIC-image",
