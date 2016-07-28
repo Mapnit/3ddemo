@@ -51,6 +51,7 @@
 	  "esri/layers/FeatureLayer",
 	  "esri/renderers/SimpleRenderer",
 	  "esri/symbols/SimpleMarkerSymbol",
+	  "esri/symbols/SimpleLineSymbol", 
 	  "esri/symbols/ObjectSymbol3DLayer",
       "esri/symbols/IconSymbol3DLayer",
       "esri/symbols/PointSymbol3D",
@@ -63,7 +64,7 @@
       "dojo/domReady!"
     ], function(Map, SceneView, MapView, watchUtils, 
 		GraphicsLayer, Graphic, Point, Polyline, Polygon,
-		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, 
+		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, 
 		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D,
 		Home, dom, domStyle, all) {
 	  
@@ -283,6 +284,12 @@
         ground: "world-elevation",
 		layers: [ wellsLyr,  wellsSurfaceLyr2D ]
       });
+	  
+	  // Add graphic layer to 3d map
+	  var graphicsLayer = new GraphicsLayer({
+	    id: "wellPathGraphicsLayer"
+	  });
+      sceneMap.add(graphicsLayer);
 
       // Create the SceneView for 3D map
       var sceneView = new SceneView({
@@ -323,11 +330,34 @@
       });
 	  
 	  // Highlight well on the map view
-	  function highlightWellOnMapView(f) {
+	  function highlightWellOnMapView(f, mv) {
+	    console.debug("highlightWellOnMapView"); 
 	  }	  
 	  
 	  // Highlight deviation paths on the scene view
-	  function highlightWellOnSceneView(f) {
+	  function highlightWellOnSceneView(f, sv) {
+	    console.debug("highlightWellOnSceneView"); 
+		var wellPath = new Polyline({
+		  paths: [
+            [f.geometry.x, f.geometry.y, -0.3048 * 100 ],
+            [f.geometry.x, f.geometry.y, -0.3048 * f.attributes["DEPTH"]]
+          ], 
+		  spatialReference: f.geometry.spatialReference
+		}),
+		lineSymbol = new SimpleLineSymbol({
+          color: [226, 119, 40],
+          width: 6
+        });
+		
+		var wellPathGraphic = new Graphic({
+          geometry: wellPath,
+          symbol: lineSymbol
+        });
+		
+		var graphicsLayer = sv.map.findLayerById("wellPathGraphicsLayer"); 
+		if (graphicsLayer) {
+		  graphicsLayer.add(wellPathGraphic);
+		}	
 	  }
 	  
 	  // Set the scene view to the passed feature
@@ -335,6 +365,10 @@
 		if (f) {
 		  console.debug("show-subsurface-view: " + f.geometry); 
 		  domStyle.set("sceneViewDiv", "visibility", "visible");
+		  // highlight features
+		  highlightWellOnSceneView(f, sceneView); 
+		  highlightWellOnMapView(f, mapView); 
+		  // 
 		  sceneView.then(function() { 
 			  sceneView.goTo({
 				target: f.geometry,
