@@ -55,6 +55,8 @@
 	  "esri/symbols/ObjectSymbol3DLayer",
       "esri/symbols/IconSymbol3DLayer",
       "esri/symbols/PointSymbol3D",
+	  "esri/symbols/PathSymbol3DLayer",
+	  "esri/symbols/LineSymbol3D", 
       
 	  "esri/widgets/Home",
       
@@ -65,7 +67,8 @@
     ], function(Map, SceneView, MapView, watchUtils, 
 		GraphicsLayer, Graphic, Point, Polyline, Polygon,
 		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, 
-		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D,
+		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D, 
+		PathSymbol3DLayer, LineSymbol3D, 
 		Home, dom, domStyle, all) {
 	  
 	  // Define the feature layer URLs
@@ -337,17 +340,21 @@
 	  // Highlight deviation paths on the scene view
 	  function highlightWellOnSceneView(f, sv) {
 	    console.debug("highlightWellOnSceneView"); 
+		var sizeFactor = 0.3048,
+			zOffset = 1000; 
 		var wellPath = new Polyline({
 		  paths: [
-            [f.geometry.x, f.geometry.y, -0.3048 * 100 ],
-            [f.geometry.x, f.geometry.y, -0.3048 * f.attributes["DEPTH"]]
+            [f.geometry.x, f.geometry.y, sizeFactor * zOffset],
+            [f.geometry.x, f.geometry.y, sizeFactor * (zOffset - f.attributes["DEPTH"])]
           ], 
 		  spatialReference: f.geometry.spatialReference
 		}),
-		lineSymbol = new SimpleLineSymbol({
-          color: [226, 119, 40],
-          width: 6
-        });
+		lineSymbol = new LineSymbol3D({
+		  symbolLayers: [new PathSymbol3DLayer({
+			size: 60,  // width of the tube in meters
+			material: { color: [ 0, 255, 255 ] }
+		  })]
+		});
 		
 		var wellPathGraphic = new Graphic({
           geometry: wellPath,
