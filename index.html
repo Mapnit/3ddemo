@@ -24,12 +24,6 @@
 	  visibility: hidden;
     }
 	
-    #homeDiv {
-      left: 15px;
-      top: 100px;
-      z-index: 35;
-      position: absolute;
-    }	
   </style>
 
   <link rel="stylesheet" href="//js.arcgis.com/4.0/esri/css/main.css">
@@ -198,6 +192,14 @@
 		extent: defaultExtent
       });
 	  
+      // Set up a home button for resetting the viewpoint to the intial extent
+      var homeBtn = new Home({
+        view: mapView
+      });
+
+      // Add the home widget to the top left corner of the view
+      mapView.ui.add(homeBtn, "top-left");
+	  
 	  // Define the action handler in the mapView popup 
 	  mapView.popup.on("trigger-action", function(evt) {
         if (evt.action.id === "show-subsurface-view") {
@@ -213,12 +215,6 @@
           return;
         }
       });
-	  
-      // Set up a home button for resetting the viewpoint to the intial extent
-      var homeBtn = new Home({
-        view: mapView
-      }, "homeDiv");
-      homeBtn.startup(); 	  
 	  
 	  // Define Renderer for symbolizing wells below the surface
 	  var wellsDepthRenderer = new SimpleRenderer({
@@ -446,7 +442,6 @@
 
 <body>
   <div id="mapViewDiv"></div>
-  <div id="homeDiv"></div>
   <div id="sceneViewDiv"></div>
 </body>
 </html>
