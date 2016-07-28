@@ -363,8 +363,9 @@
 		
 		var graphicsLayer = sv.map.findLayerById("wellPathGraphicsLayer"); 
 		if (graphicsLayer) {
+		  graphicsLayer.removeAll(); 
 		  graphicsLayer.add(wellPathGraphic);
-		}	
+		}
 	  }
 	  
 	  // Set the scene view to the passed feature
