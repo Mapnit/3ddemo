@@ -180,7 +180,13 @@
 	  var mainMap = new Map({
         basemap: "topo", 
 		layers: [ wellsSurfaceLyr2D ]
-      });	  
+      });
+		
+	  // Add graphic layer to the 2d map
+	  var graphicsLayer = new GraphicsLayer({
+	    id: "wellHeaderGraphicsLayer"
+	  });
+      mainMap.add(graphicsLayer);
 	  
       // Create the MapView for main 2D map
       var mapView = new MapView({
@@ -333,8 +339,28 @@
       });
 	  
 	  // Highlight well on the map view
-	  function highlightWellOnMapView(f, mv) {
+	  function highlightWellOnMapView(f, mapView) {
 	    console.debug("highlightWellOnMapView"); 
+		var wellHeader = f.geometry.clone(),
+		  markerSymbol = new SimpleMarkerSymbol({
+            size: 6,
+		    color: [0, 255, 255],
+            outline: { // autocasts as new SimpleLineSymbol()
+              color: [0, 255, 255, 0.4],
+              width: 2
+            }
+          });
+		
+		var wellHeaderGraphic = new Graphic({
+          geometry: wellHeader,
+          symbol: markerSymbol
+        });
+
+        var graphicsLayer = mapView.map.findLayerById("wellHeaderGraphicsLayer"); 
+		if (graphicsLayer) {
+		  graphicsLayer.removeAll(); 
+		  graphicsLayer.add(wellHeaderGraphic);
+		}
 	  }	  
 	  
 	  // Highlight deviation paths on the scene view
