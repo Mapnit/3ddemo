@@ -444,7 +444,9 @@
 		
 		var wellPathGraphic = new Graphic({
           geometry: wellPath,
-          symbol: lineSymbol
+          symbol: lineSymbol, 
+		  attributes: f.attributes, 
+		  popupTemplate: wellsTemplate
         });
 		
 		var graphicsLayer = sceneView.map.findLayerById("wellPathGraphicsLayer"); 
