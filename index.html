@@ -58,6 +58,7 @@
 	  "esri/widgets/Home",
 	  "esri/widgets/Search", 
       
+	  "dojo/on",
 	  "dojo/dom",
 	  "dojo/dom-construct",
 	  "dojo/dom-style", 
@@ -68,7 +69,7 @@
 		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, 
 		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D, 
 		PathSymbol3DLayer, LineSymbol3D, 
-		Compass, Home, Search, dom, domConstruct, domStyle, all) {
+		Compass, Home, Search, on, dom, domConstruct, domStyle, all) {
 	  
 	  // Define the Popup Template for surface well
 	  var wellsSurfaceTemplate = { // autocasts as new PopupTemplate()
