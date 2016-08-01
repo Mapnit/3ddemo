@@ -373,6 +373,24 @@
         }
       });
 	  
+	  // Create the close_3d_Map image button
+	  var close3dMap = domConstruct.create("img", {
+		id: "close_3d_map", 
+		src: "images/close_3d_map.png", 
+		title: "Close 3D Map", 
+		width: 24, 
+		height: 24
+	  });
+	  
+	  // Add the close_3d_Map image button to the top right corner of the view
+	  sceneView.ui.add(close3dMap, {
+		position: "top-right"
+	  });  
+	  
+	  on(close3dMap, "click", function(evt) {
+		domStyle.set("sceneViewDiv", "visibility", "hidden");
+	  });  
+	  
 	  // Highlight well on the map view
 	  function highlightWellOnMapView(f, mapView) {
 	    console.debug("highlightWellOnMapView"); 
