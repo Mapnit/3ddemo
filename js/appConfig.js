@@ -1,7 +1,7 @@
 var appConfig = {
 	  // Define the feature layer URLs
-      wellsUrl:
-        "//services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/HarperSumnerOGWells/FeatureServer/0",  
+      wellsUrl: "//services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/HarperSumnerOGWells/FeatureServer/0",  
+	  quakesUrl: "//services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/ks_earthquakes_since_2000/FeatureServer/0",
 	  
 	  // The initial clipping extent for the scene view
       defaultExtent: { // autocasts as new Extent()

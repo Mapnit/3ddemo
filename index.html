@@ -152,10 +152,46 @@
         renderer: wellsSurfaceRenderer2D
       });
 	  
+	  var quakesTemplate = { // autocasts as new PopupTemplate()
+		title: "{place}",
+		content: "<b>Date and time:</b> {date_evt}<br>" +
+		  "<b>Magnitude (0-10): </b> {mag}<br>" +
+		  "<b>Depth: </b> {depth} km<br>",
+		fieldInfos: [{
+		  fieldName: "date_evt",
+		  format: {
+			dateFormat: "short-date-short-time"
+		  }
+		}],
+		actions: []
+	  };
+
+	  // Quakes will be symbolized as circles
+	  var quakesSurfaceRenderer2D = new SimpleRenderer({
+		symbol: new SimpleMarkerSymbol({
+		  size: 6,
+		  color: "#FF40CC",
+		  outline: {
+			color: [179, 75, 75, 0.4],
+			width: 2
+		  }
+		})
+	  });	
+
+	  // Defines a layer for depicting quakes on the surface
+	  var quakesSurfaceLyr = new FeatureLayer({
+		url: appConfig.quakesUrl,
+		definitionExpression: "mag >= 2",
+		outFields: ["*"],
+		renderer: quakesSurfaceRenderer2D,
+		popupTemplate: quakesTemplate,
+		opacity: 0.6
+	  });	  	  
+	  
 	  // Create 2d map for the main view
 	  var mainMap = new Map({
         basemap: "topo", 
-		layers: [ wellsSurfaceLyr2D ]
+		layers: [ wellsSurfaceLyr2D, quakesSurfaceLyr ]
       });
 		
 	  // Add graphic layer to the 2d map
