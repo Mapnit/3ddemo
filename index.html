@@ -359,11 +359,109 @@
         }
       }); 
 	  
+	  // Define Renderer for symbolizing quakes below the surface
+	  var quakesRenderer = new SimpleRenderer({
+		symbol: new PointSymbol3D({
+		  symbolLayers: [new ObjectSymbol3DLayer({
+			resource: {
+			  primitive: "sphere"
+			}
+		  })]
+		}),
+		visualVariables: [{
+		  type: "color",
+		  field: "date_evt",
+		  theme: "high-to-low",
+		  stops: [{
+				value: 1374735600000,
+				color: "white"
+			  }, // From mid-2013
+			  {
+				value: 1447056100000,
+				color: "red"
+			  }
+			] // to Nov. 2015
+		}, {
+		  type: "size",
+		  field: "mag",
+		  axis: "all",
+		  valueUnit: "unknown",
+		  stops: [
+		  {
+			value: 2,
+			size: 100
+		  },
+		  {
+			value: 5,
+			size: 2000
+		  }]
+		}]
+	  });
+	  
+	  // Define a layer for drawing the exact location of quakes below the surface
+	  var quakesDepthLyr = new FeatureLayer({
+		url: appConfig.quakesUrl,
+		// Show only quakes of magnitude 2.0 or higher
+		definitionExpression: "mag >= 2",
+		outFields: ["*"],
+		renderer: quakesRenderer,
+		popupTemplate: quakesTemplate,
+		returnZ: true,
+		elevationInfo: {
+		  mode: "relativeToGround"
+		}
+	  });
+
+	  // Symbol size will vary depending on magnitude of the quake
+	  var quakesSurfaceRenderer = new SimpleRenderer({
+		symbol:       // Quakes will be symbolized as circles
+		  new PointSymbol3D({
+			symbolLayers: [
+			  new IconSymbol3DLayer({
+				material: {
+				  color: [179, 75, 75]
+				},
+				resource: {
+				  primitive: "circle"
+				}
+			  })
+			]
+		  }),
+		visualVariables: [{
+		  type: "size",
+		  field: "mag",
+		  axis: "all",
+		  valueUnit: "unknown",
+		  stops: [
+		  {
+			value: 2,
+			size: 3
+		  },
+		  {
+			value: 5,
+			size: 50
+		  }]
+		}]
+	  });  
+	  
+	  // Defines a layer for depicting quakes on the surface
+	  var quakesSurfaceLyr2D = new FeatureLayer({
+		url: appConfig.quakesUrl,
+		definitionExpression: "mag >= 2",
+		outFields: ["*"],
+		renderer: quakesSurfaceRenderer,
+		popupTemplate: quakesTemplate,
+		opacity: 0.6,
+		elevationInfo: {
+		  mode: "onTheGround"
+		}
+	  });
+	  
 	  // Create 3d map for the scene view
 	  var sceneMap = new Map({
         basemap: "topo",
         ground: "world-elevation",
-		layers: [ wellsLyr,  wellsSurfaceLyr2D ]
+		layers: [ wellsLyr,  wellsSurfaceLyr2D, quakesDepthLyr, quakesSurfaceLyr2D ]
       });
 	  
 	  // Add graphic layer to 3d map
