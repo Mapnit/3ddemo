@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Map3D Demo</title>
+  <style>
+    html,body,#mapViewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      z-index: -1;
+    }
+    
+    #sceneViewDiv {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 800px;
+      height: 600px;
+      border: 2px solid black;
+      z-index: 1;
+	  visibility: hidden;
+    }
+	
+	.imgButton {
+	  cursor: pointer; 
+	}
+	
+  </style>
+
+  <link rel="stylesheet" href="//js.arcgis.com/4.0/esri/css/main.css">
+  <script src="//js.arcgis.com/4.0/"></script>
+  
+  <script src="js/appConfig_demo.js"></script>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/views/MapView",
+      "esri/core/watchUtils",
+	  
+	  "esri/layers/GraphicsLayer",
+      "esri/Graphic",
+      "esri/geometry/Point",
+      "esri/geometry/Polyline",
+      "esri/geometry/Polygon",
+	  
+	  "esri/layers/FeatureLayer",
+	  "esri/renderers/SimpleRenderer",
+	  "esri/symbols/SimpleMarkerSymbol",
+	  "esri/symbols/SimpleLineSymbol", 
+	  "esri/symbols/ObjectSymbol3DLayer",
+      "esri/symbols/IconSymbol3DLayer",
+      "esri/symbols/PointSymbol3D",
+	  "esri/symbols/PathSymbol3DLayer",
+	  "esri/symbols/LineSymbol3D", 
+	  "esri/symbols/TextSymbol3DLayer", 
+	  "esri/symbols/LabelSymbol3D", 
+	  "esri/layers/support/LabelClass", 
+      
+	  "esri/widgets/Compass",
+	  "esri/widgets/Home",
+	  "esri/widgets/Search", 
+      
+	  "dojo/on",
+	  "dojo/dom",
+	  "dojo/dom-construct",
+	  "dojo/dom-class",
+	  "dojo/dom-style", 
+      "dojo/promise/all",
+      "dojo/domReady!"
+    ], function(Map, SceneView, MapView, watchUtils, 
+		GraphicsLayer, Graphic, Point, Polyline, Polygon,
+		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, 
+		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D, 
+		PathSymbol3DLayer, LineSymbol3D, 
+		TextSymbol3DLayer, LabelSymbol3D, LabelClass, 
+		Compass, Home, Search, on, dom, domConstruct, domClass, domStyle, all) {
+	  
+	  // Define the Popup Template for surface well
+	  var wellHeadsTemplate = { // autocasts as new PopupTemplate()
+        title: "WELL",
+        content: appConfig.wellHeadsPopupTemplateContent,
+        fieldInfos: [{
+          fieldName: "SPUD",
+          format: {
+            dateFormat: "short-date"
+          }
+        }, {
+          fieldName: "COMP_DATE",
+          format: {
+            dateFormat: "short-date"
+          }
+        }],
+        actions: [{
+          id: "show-subsurface-view",
+          title: "Deviation Survey",
+		  image: "images/well_path.png"
+		}]
+      };
+
+      // Create Renderer for rendering well locations on the surface
+      var wellHeadsRenderer2D = new SimpleRenderer({
+        symbol: new SimpleMarkerSymbol({
+		  size: 6,
+		  color: "#FF4000",
+		  outline: {
+			color: [255, 64, 0, 0.4],
+			width: 2
+		  }
+		})
+      });
+	  
+	  // Create Layer for depicting well locations on the surface
+      var wellHeadsLyr2D = new FeatureLayer({
+        url: appConfig.WellHeadsUrl,
+        definitionExpression: appConfig.wellsDataFilterExpr,
+		outFields: ["*"],
+        popupTemplate: wellHeadsTemplate,
+        renderer: wellHeadsRenderer2D
+      });
+	  
+	  // Create 2d map for the main view
+	  var mainMap = new Map({
+        basemap: "topo", 
+		layers: [ wellHeadsLyr2D ]
+      });
+		
+	  // Add graphic layer to the 2d map
+	  var graphicsLayer = new GraphicsLayer({
+	    id: "wellHeaderGraphicsLayer"
+	  });
+      mainMap.add(graphicsLayer);
+	  
+      // Create the MapView for main 2D map
+      var mapView = new MapView({
+        container: "mapViewDiv",
+        map: mainMap, 
+		extent: appConfig.defaultExtent
+      });
+	  
+      // Set up a home button for resetting the viewpoint to the intial extent
+      var homeBtn = new Home({
+        view: mapView
+      });
+
+      // Add the home widget to the top left corner of the view
+      mapView.ui.add(homeBtn, "top-left");
+	  
+	  // Create a Compass widget
+	  var compassWidget = new Compass({
+	    view: mapView
+	  });
+
+	  // Add the Compass widget to the top left corner of the view
+	  mapView.ui.add(compassWidget, "top-left");
+	  
+	  // Create the LOGIC logo tag
+	  var logoImg = domConstruct.create("img", {
+        id: "logo-LOGIC-image",
+        src: "http://logicsolutionsgroup.com/images/Logic_Logo.png",
+        title: "LOGIC Solutions Group",
+		width: 136,
+		height: 77
+      }),
+	  logoLink = domConstruct.create("a", {
+        id: "logo-LOGIC-link",
+	    href: "http://logicsolutionsgroup.com/"
+	  }); 
+	  
+	  domConstruct.place(logoImg, logoLink); 
+	  
+	  // Add the LOGIC logo to the bottom left corner of the view
+      mapView.ui.add(logoLink, {
+        position: "bottom-left"
+      });
+	  
+	  // Create the Search Widget on wells
+	  var searchWidget = new Search({
+        view: mapView,
+        allPlaceholder: "Well Name or API",
+        sources: [{
+          featureLayer: wellHeadsLyr2D,
+          searchFields: ["number", "api"],
+          suggestionTemplate: "{number}, {api}",
+          exactMatch: false,
+          outFields: ["*"],
+          name: "Well",
+          placeholder: "example: 22-2-X-10",
+		  popupEnabled: false, 
+		  resultGraphicEnabled: false,
+		  resultSymbol: new SimpleMarkerSymbol({
+            size: 6,
+		    color: [0, 255, 255],
+            outline: { // autocasts as new SimpleLineSymbol()
+              color: [0, 255, 255, 0.4],
+              width: 2
+            }
+          })
+        }]
+      });
+
+      searchWidget.startup();
+
+      // Add the search widget to the top left corner of the view
+      mapView.ui.add(searchWidget, {
+        position: "top-right"
+      });
+	  
+	  // Define the action handler in the mapView popup 
+	  mapView.popup.on("trigger-action", function(evt) {
+	    if (evt.action.id === "show-subsurface-view") {
+		  console.debug("show-subsurface-view"); 
+		  showDeviationView(mapView.popup.selectedFeature);
+        } else {
+          return;
+        }
+      });
+	  
+	  var wellsLabelClass = new LabelClass({
+	    labelExpressionInfo: {
+		  //value: "{DEPTH}m, by {COMPLETION}"  // Text for labels 
+		  value: "{adjz} m"
+	    },
+		labelPlacement: "center-right",
+	    symbol: new LabelSymbol3D({
+		  symbolLayers: [new TextSymbol3DLayer({
+		    material: { color: [49,163,84] },
+		    size: 10  // Defined in points
+		  })]
+	    })
+	  });
+
+	  // Define the Popup Template for subsurface well
+	  var wellBoresTemplate = { // autocasts as new PopupTemplate()
+        title: "Deviation Survey",
+        content: appConfig.wellBoresPopupTemplateContent,
+        fieldInfos: [],
+        actions: []
+      };	  
+	  
+	  // Define Renderer for symbolizing deviation points below the surface
+	  var wellBoresRenderer = new SimpleRenderer({
+		symbol: new PointSymbol3D({
+		  symbolLayers: [new ObjectSymbol3DLayer({
+		  /*
+		    material: {
+			  color: [179, 75, 75]
+			},
+			*/
+			resource: {
+			  primitive: "sphere"
+			}, 
+			width: 50,
+			height: 50
+		  })]
+		}),
+		visualVariables: [{
+		  type: "size",
+		  axis: "all",
+		  useSymbolValue: true
+		  /*
+		  field: "dhorizontal",
+		  valueUnit: "unknown",
+		  stops: [{
+			value: 1,
+			size: 10
+		  }, {
+			value: 64,
+			size: 100
+		  }]
+		  */
+		}, {
+		  type: "color", 
+		  field: "wellboreindex", 
+		  theme: "high-to-low",
+          stops: [{
+                value: 1,
+                color: [179, 75, 75, 0.8]
+              }, {
+                value: 2,
+                color: [255, 64, 0, 0.8]
+              }
+            ] 
+		}]
+	  });
+	  
+	  // Define a layer for drawing the exact location of quakes below the surface
+	  var wellBoresDepthLyr = new FeatureLayer({
+		url: appConfig.WellBoresUrl,
+		//definitionExpression: "dhorizontal > 0",
+		outFields: ["*"],
+		labelsVisible: true,
+		labelingInfo: [ wellsLabelClass ], 
+		renderer: wellBoresRenderer,
+		popupTemplate: wellBoresTemplate,
+		returnZ: true,
+		elevationInfo: {
+		  mode: "relativeToGround",
+		  offset: -50
+		}
+	  });
+	  
+	  // Quakes will be symbolized as circles
+	  var wellBoresSurfaceRenderer2D = new SimpleRenderer({
+		symbol: new SimpleMarkerSymbol({
+		  size: 6,
+		  color: "#FF40CC",
+		  outline: {
+			color: [179, 75, 75, 0.4],
+			width: 2
+		  }
+		})
+	  });
+	  
+	  // Defines a layer for depicting quakes on the surface
+	  var wellBoresSurfaceLyr2D = new FeatureLayer({
+		url: appConfig.WellBoresUrl,
+		definitionExpression: "dhorizontal > 0",
+		outFields: ["*"],
+		renderer: wellBoresSurfaceRenderer2D,
+		popupTemplate: wellBoresTemplate,
+		opacity: 0.6,
+		elevationInfo: {
+		  mode: "onTheGround"
+		}
+	  });
+	  
+	  // Create 3d map for the scene view
+	  var sceneMap = new Map({
+        basemap: "topo",
+        ground: "world-elevation",
+		layers: [ wellBoresDepthLyr, wellBoresSurfaceLyr2D ]
+      });
+	  
+	  // Add graphic layer to 3d map
+	  var graphicsLayer = new GraphicsLayer({
+	    id: "wellPathGraphicsLayer"
+	  });
+      sceneMap.add(graphicsLayer);
+
+      // Create the SceneView for 3D map
+      var sceneView = new SceneView({
+        container: "sceneViewDiv",
+        map: sceneMap,
+		// Indicates to create a local scene
+        viewingMode: "local",
+        // Use the exent defined in clippingArea to define the bounds of the scene
+        clippingArea: appConfig.defaultExtent,
+        extent: appConfig.defaultExtent,
+        // Allows for navigating the camera below the surface
+        constraints: {
+          collision: {
+            enabled: false
+          },
+          tilt: {
+            max: 179.99
+          }
+        },
+        // Turns off atmosphere and stars settings
+        environment: {
+          atmosphere: null,
+          starsEnabled: false
+        }
+      });
+	  
+	  // Define the action handler in the sceneView popup 
+	  sceneView.popup.on("trigger-action", function(evt) {
+      });
+	  
+	  // Create the close_3d_Map image button
+	  var close3dMap = domConstruct.create("img", {
+		id: "close_3d_map", 
+		src: "images/close_3d_map.png", 
+		title: "Close 3D Map", 
+		width: 24, 
+		height: 24
+	  });
+	  
+	  domClass.add(close3dMap, "imgButton"); 
+	  
+	  // Add the close_3d_Map image button to the top right corner of the view
+	  sceneView.ui.add(close3dMap, {
+		position: "top-right"
+	  });  
+	  
+	  on(close3dMap, "click", function(evt) {
+		domStyle.set("sceneViewDiv", "visibility", "hidden");
+	  });  
+	  
+	  // Highlight well on the map view
+	  function highlightWellOnMapView(f, mapView) {
+	    console.debug("highlightWellOnMapView"); 
+		var wellHeader = f.geometry.clone(),
+		  markerSymbol = new SimpleMarkerSymbol({
+            size: 6,
+		    color: [0, 255, 255],
+            outline: { // autocasts as new SimpleLineSymbol()
+              color: [0, 255, 255, 0.4],
+              width: 2
+            }
+          });
+		
+		var wellHeaderGraphic = new Graphic({
+          geometry: wellHeader,
+          symbol: markerSymbol,
+		  attributes: f.attributes, 
+		  popupTemplate: wellHeadsTemplate
+        });
+
+        var graphicsLayer = mapView.map.findLayerById("wellHeaderGraphicsLayer"); 
+		if (graphicsLayer) {
+		  graphicsLayer.removeAll(); 
+		  graphicsLayer.add(wellHeaderGraphic);
+		}
+	  }	  
+	  
+	  // Highlight deviation paths on the scene view
+	  function highlightWellOnSceneView(f, sceneView) {
+	    console.debug("highlightWellOnSceneView"); 
+		var sizeFactor = 0.3048,
+			zOffset = 1000; 
+		var wellPath = new Polyline({
+		  paths: [
+            [f.geometry.x, f.geometry.y, sizeFactor * zOffset],
+            [f.geometry.x, f.geometry.y, sizeFactor * (zOffset - f.attributes["DEPTH"])]
+          ], 
+		  spatialReference: f.geometry.spatialReference
+		}),
+		lineSymbol = new LineSymbol3D({
+		  symbolLayers: [new PathSymbol3DLayer({
+			size: 60,  // width of the tube in meters
+			material: { color: [ 0, 255, 255 ] }
+		  })]
+		});
+		
+		var wellPathGraphic = new Graphic({
+          geometry: wellPath,
+          symbol: lineSymbol, 
+		  attributes: f.attributes, 
+		  popupTemplate: wellsTemplate
+        });
+		
+		var graphicsLayer = sceneView.map.findLayerById("wellPathGraphicsLayer"); 
+		if (graphicsLayer) {
+		  graphicsLayer.removeAll(); 
+		  graphicsLayer.add(wellPathGraphic);
+		}
+	  }
+	  
+	  // Set the scene view to the passed feature
+	  function showDeviationView(f) {
+		if (f) {
+		  console.debug("show-subsurface-view: " + f.geometry); 
+		  // highlight features
+		  //highlightWellOnSceneView(f, sceneView); 
+		  highlightWellOnMapView(f, mapView); 
+		  // 
+		  sceneView.then(function() { 
+			  sceneView.goTo({
+				target: f.geometry,
+				scale: 32000,
+				heading: 342,
+				tilt: 95
+			  }, {
+				animate: true
+			  });
+		  });
+		  domStyle.set("sceneViewDiv", "visibility", "visible");
+		} else {
+		  console.warn("no feature was selected"); 
+		} 
+	  }
+
+	});
+  </script>
+</head>
+
+<body>
+  <div id="mapViewDiv"></div>
+  <div id="sceneViewDiv"></div>
+</body>
+</html>
