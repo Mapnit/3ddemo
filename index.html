@@ -24,6 +24,10 @@
 	  visibility: hidden;
     }
 	
+	.imgButton {
+	  cursor: pointer; 
+	}
+	
   </style>
 
   <link rel="stylesheet" href="//js.arcgis.com/4.0/esri/css/main.css">
@@ -61,6 +65,7 @@
 	  "dojo/on",
 	  "dojo/dom",
 	  "dojo/dom-construct",
+	  "dojo/dom-class",
 	  "dojo/dom-style", 
       "dojo/promise/all",
       "dojo/domReady!"
@@ -70,6 +75,7 @@
 		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D, 
 		PathSymbol3DLayer, LineSymbol3D, 
 		Compass, Home, Search, on, dom, domConstruct, domStyle, all) {
+		Compass, Home, Search, on, dom, domConstruct, domClass, domStyle, all) {
 	  
 	  // Define the Popup Template for surface well
 	  var wellsSurfaceTemplate = { // autocasts as new PopupTemplate()
@@ -516,6 +522,8 @@
 		width: 24, 
 		height: 24
 	  });
+	  
+	  domClass.add(close3dMap, "imgButton"); 
 	  
 	  // Add the close_3d_Map image button to the top right corner of the view
 	  sceneView.ui.add(close3dMap, {

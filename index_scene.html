@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Scene Layer - 4.0</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.0/esri/css/main.css">
+  <script src="https://js.arcgis.com/4.0/"></script>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/layers/SceneLayer",
+	  "esri/layers/FeatureLayer",
+      "esri/renderers/SimpleRenderer",
+      "esri/symbols/LineSymbol3D",
+      "esri/symbols/PathSymbol3DLayer",
+
+      "dojo/domReady!"
+    ], function(Map, SceneView, SceneLayer, FeatureLayer, SimpleRenderer, LineSymbol3D, PathSymbol3DLayer) {
+
+      // Create Map
+      var map = new Map({
+        basemap: "dark-gray",
+        ground: "world-elevation"
+      });
+
+      // Create the SceneView
+      var view = new SceneView({
+        container: "viewDiv",
+        map: map,
+        camera: {
+          position: [ -102.81 , 31.24, 707],
+          tilt: 81,
+          heading: 50
+        }
+      });
+
+      // Create SceneLayer and add to the map
+      var sceneLayer =  new SceneLayer({
+        url: "http://gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/Test3DLineFC/SceneServer/layers/0",
+		renderer: new SimpleRenderer({
+          symbol: new LineSymbol3D({
+			symbolLayers: [new PathSymbol3DLayer({
+			  size: 50,    // width of the tube in meters
+			  material: { color: [ 128,128,128 ] }
+			})]
+		  })
+        }), 
+        popupEnabled: true
+      });
+      
+      //map.add(sceneLayer);
+	  
+      // Create SceneLayer and add to the map
+      var sceneLayer2 =  new FeatureLayer({
+        url: "http://gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/Test3DLineFC/FeatureServer/0",
+		outFields: ["*"],
+		renderer: new SimpleRenderer({
+          symbol: new LineSymbol3D({
+			symbolLayers: [new PathSymbol3DLayer({
+			  size: 50,    // width of the tube in meters
+			  material: { color: [ 128,128,128 ] }
+			})]
+		  })
+        }), 
+        popupEnabled: true,
+		returnZ: true,
+		elevationInfo: {
+		  mode: "relativeToGround"
+		}
+      });
+      
+      map.add(sceneLayer2);	  
+
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>

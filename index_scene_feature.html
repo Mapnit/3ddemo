@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Scene Layer - 4.0</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.0/esri/css/main.css">
+  <script src="https://js.arcgis.com/4.0/"></script>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/layers/SceneLayer",
+	  "esri/layers/FeatureLayer",
+      "esri/renderers/SimpleRenderer",
+      "esri/symbols/LineSymbol3D",
+      "esri/symbols/PathSymbol3DLayer",
+	  "esri/symbols/PointSymbol3D",
+	  "esri/symbols/ObjectSymbol3DLayer",
+	  
+	  "esri/core/watchUtils",
+
+      "dojo/domReady!"
+    ], function(Map, SceneView, SceneLayer, FeatureLayer, SimpleRenderer, LineSymbol3D, PathSymbol3DLayer, PointSymbol3D, ObjectSymbol3DLayer, watchUtils) {
+
+	  // Define Renderer for symbolizing quakes below the surface
+	  var storesRenderer = new SimpleRenderer({
+		symbol: new PointSymbol3D({
+		  symbolLayers: [new ObjectSymbol3DLayer({
+			width: 5,  // diameter of the object from east to west in meters
+			height: 20,  // height of the object in meters
+			depth: 15,  // diameter of the object from north to south in meters
+			resource: { primitive: "cylinder" },
+			material: { color: "red" }
+		  })]
+		}),
+		visualVariables: [{
+		  type: "color",
+		  field: "Opening_Date",
+		  theme: "high-to-low",
+		  stops: [{
+				value: 1374735600000,
+				color: "white"
+			  }, // From mid-2013
+			  {
+				value: 1447056100000,
+				color: "red"
+			  }
+			] // to Nov. 2015
+		}]
+	  });
+	  
+	  // Define a layer for drawing the exact location of quakes below the surface
+	  var storesDepthLyr = new FeatureLayer({
+		url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Apple_Stores/FeatureServer/0",
+		outFields: ["*"],
+		renderer: storesRenderer,
+		elevationInfo: {
+		  mode: "onTheGround"
+		}
+	  });
+	  
+      // Create SceneLayer and add to the map
+      var sceneLayer2 =  new FeatureLayer({
+        url: "http://gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/Test3DLineFC/FeatureServer/0",
+		outFields: ["*"],
+		renderer: new SimpleRenderer({
+          symbol: new LineSymbol3D({
+			symbolLayers: [new PathSymbol3DLayer({
+			  size: 50,    // width of the tube in meters
+			  material: { color: [ 128,128,128 ] }
+			})]
+		  }), 
+		  visualVariables: [{
+			  type: "color",
+			  field: "lineid",
+			  theme: "high-to-low",
+			  stops: [{
+					value: 1,
+					color: "white"
+				  }, {
+					value: 2,
+					color: "red"
+				  }
+				]
+			}, {
+			  type: "size",
+			  field: "lineid",
+			  axis: "all",
+			  valueUnit: "unknown",
+			  stops: [
+			  {
+				value: 1,
+				size: 50
+			  }, {
+				value: 2,
+				size: 50
+			  }]
+			}]
+        }), 
+        popupEnabled: true,
+		returnZ: true,
+		elevationInfo: {
+		  mode: "relativeToGround"
+		}
+      });
+      
+      //map.add(sceneLayer2);
+	  
+      // Create Map
+      var map = new Map({
+        basemap: "topo",
+        ground: "world-elevation",
+		layers: [storesDepthLyr]
+      });
+
+      // Create the SceneView
+      var view = new SceneView({
+        container: "viewDiv",
+        map: map,
+        camera: {
+          position: [ -102.81 , 31.24, 707],
+          tilt: 81,
+          heading: 50
+        }
+      });	  
+	  
+	  // Update the scene view when the main view becomes stationary
+      watchUtils.when(view, "stationary", updateSceneView);  
+	  
+	  function updateSceneView() {
+	    console.debug("SceneView"); 
+	  }	  
+	  
+	  view.then(function() {
+		  view.goTo({
+			center: [ -102.82437637011232 , 31.192247648841093],
+			zoom: 14,
+			tilt: 57,
+			heading: 358
+		  });
+	  }); 	  
+
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>

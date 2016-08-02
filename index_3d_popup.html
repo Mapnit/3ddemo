@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Map3D Demo</title>
+  <style>
+    html,body,#mapViewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      z-index: -1;
+    }
+    
+    #sceneViewDiv {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 800px;
+      height: 600px;
+      border: 2px solid black;
+      z-index: 1;
+	  visibility: hidden;
+    }
+	
+  </style>
+
+  <link rel="stylesheet" href="//js.arcgis.com/4.0/esri/css/main.css">
+  <script src="//js.arcgis.com/4.0/"></script>
+  
+  <script src="js/appConfig.js"></script>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/views/MapView",
+      "esri/core/watchUtils",
+	  
+	  "esri/layers/GraphicsLayer",
+      "esri/Graphic",
+      "esri/geometry/Point",
+      "esri/geometry/Polyline",
+      "esri/geometry/Polygon",
+	  
+	  "esri/layers/FeatureLayer",
+	  "esri/renderers/SimpleRenderer",
+	  "esri/symbols/SimpleMarkerSymbol",
+	  "esri/symbols/SimpleLineSymbol", 
+	  "esri/symbols/ObjectSymbol3DLayer",
+      "esri/symbols/IconSymbol3DLayer",
+      "esri/symbols/PointSymbol3D",
+	  "esri/symbols/PathSymbol3DLayer",
+	  "esri/symbols/LineSymbol3D", 
+      
+	  "esri/widgets/Compass",
+	  "esri/widgets/Home",
+	  "esri/widgets/Search", 
+      
+	  "dojo/dom",
+	  "dojo/dom-construct",
+	  "dojo/dom-style", 
+      "dojo/promise/all",
+      "dojo/domReady!"
+    ], function(Map, SceneView, MapView, watchUtils, 
+		GraphicsLayer, Graphic, Point, Polyline, Polygon,
+		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, 
+		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D, 
+		PathSymbol3DLayer, LineSymbol3D, 
+		Compass, Home, Search, dom, domConstruct, domStyle, all) {
+	  
+	  // Define the Popup Template for surface well
+	  var wellsSurfaceTemplate = { // autocasts as new PopupTemplate()
+        title: "WELL",
+        content: appConfig.wellsPopupTemplateContent,
+        fieldInfos: [{
+          fieldName: "SPUD",
+          format: {
+            dateFormat: "short-date"
+          }
+        }, {
+          fieldName: "COMPLETION",
+          format: {
+            dateFormat: "short-date"
+          }
+        }, {
+          fieldName: "DEPTH",
+          format: {
+            places: 0,
+            digitSeparator: true
+          }
+        }],
+        actions: [{
+          id: "show-subsurface-view",
+          title: "Deviation Survey",
+		  image: "images/well_path.png"
+        }, {
+          id: "add-comment-surface-well",
+          title: "Comment",
+		  image: "images/comments.png"
+        }]
+      };
+
+	  // Define the Popup Template for subsurface well
+	  var wellsTemplate = { // autocasts as new PopupTemplate()
+        title: "WELL",
+        content: appConfig.wellsPopupTemplateContent,
+        fieldInfos: [{
+          fieldName: "SPUD",
+          format: {
+            dateFormat: "short-date"
+          }
+        }, {
+          fieldName: "COMPLETION",
+          format: {
+            dateFormat: "short-date"
+          }
+        }, {
+          fieldName: "DEPTH",
+          format: {
+            places: 0,
+            digitSeparator: true
+          }
+        }],
+        actions: [{
+          id: "add-comment-well",
+          title: "Comment",
+		  image: "images/comments.png"
+        }]
+      };
+	  
+      // Create Renderer for rendering well locations on the surface
+      var wellsSurfaceRenderer2D = new SimpleRenderer({
+        symbol: new SimpleMarkerSymbol({
+		  size: 6,
+		  color: "#FF4000",
+		  outline: {
+			color: [255, 64, 0, 0.4],
+			width: 2
+		  }
+		})
+      });
+	  
+	  // Create Layer for depicting well locations on the surface
+      var wellsSurfaceLyr2D = new FeatureLayer({
+	    //mode: FeatureLayer.MODE_ONDEMAND,
+        url: appConfig.wellsUrl,
+        definitionExpression: appConfig.wellsDataFilterExpr,
+		outFields: ["*"],
+        popupTemplate: wellsSurfaceTemplate,
+        renderer: wellsSurfaceRenderer2D
+      });
+	  
+	  // Create 2d map for the main view
+	  var mainMap = new Map({
+        basemap: "topo", 
+		layers: [ wellsSurfaceLyr2D ]
+      });
+	  
+      // Create the MapView for main 2D map
+      var mapView = new MapView({
+        container: "mapViewDiv",
+        map: mainMap, 
+		extent: appConfig.defaultExtent
+      });
+
+	  // Define the action handler in the mapView popup 
+	  mapView.popup.on("trigger-action", function(evt) {
+        if (evt.action.id === "show-subsurface-view") {
+		  console.debug("show-subsurface-view"); 
+        } else if (evt.action.id === "add-comment-surface-well") {
+		  console.debug("add-comment-surface-well"); 
+		} else if (evt.action.id === "edit-comment-surface-well") {
+		  console.debug("edit-comment-surface-well"); 
+        } else {
+          return;
+        }
+      });
+	  
+	  // Define Renderer for symbolizing wells below the surface
+	  var wellsDepthRenderer = new SimpleRenderer({
+        symbol: new PointSymbol3D({
+          symbolLayers: [new ObjectSymbol3DLayer({
+            resource: {
+              primitive: "cylinder"
+            },
+            width: 50
+          })]
+        }),
+        visualVariables: [{
+          type: "size",
+          field: "DEPTH",
+          axis: "height",
+          stops: [
+          {
+            value: 1,
+            size: -0.3048
+          },
+          {
+            value: 10000,
+            size: -3048
+          }]
+        }, {
+          type: "size",
+          axis: "width",
+          useSymbolValue: true // sets the width to 50m
+        }, {
+          type: "color",
+          field: "SPUD",
+          theme: "high-to-low",
+          stops: [{
+                value: 1374735600000,
+                color: "white"
+              }, // From mid-2013
+              {
+                value: 1447056100000,
+                color: "red"
+              }
+            ] // to Nov 2015
+        }]
+      });
+
+      // Layer for depicting wells below the surface
+      var wellsLyr = new FeatureLayer({
+        url: appConfig.wellsUrl,
+        definitionExpression: appConfig.wellsDataFilterExpr,
+        outFields: ["*"],
+        popupTemplate: wellsTemplate,
+        renderer: wellsDepthRenderer,
+		returnZ: true,
+        // This keeps the cylinders from poking above the ground
+        elevationInfo: {
+          mode: "relativeToGround",
+          offset: -100
+        }
+      });
+	  
+	  // clone the well surface Feature Layer
+	  var wellsSurfaceLyr2D = new FeatureLayer({
+        url: appConfig.wellsUrl,
+        definitionExpression: appConfig.wellsDataFilterExpr,
+		outFields: ["*"],
+        popupTemplate: wellsTemplate,
+        renderer: wellsSurfaceRenderer2D,
+        elevationInfo: {
+          mode: "onTheGround"
+        }
+      }); 
+	  
+	  // Create 3d map for the scene view
+	  var sceneMap = new Map({
+        basemap: "topo",
+        ground: "world-elevation",
+		layers: [ wellsLyr,  wellsSurfaceLyr2D ]
+      });
+
+      // Create the SceneView for 3D map
+      var sceneView = new SceneView({
+        container: "sceneViewDiv",
+        map: sceneMap,
+		// Indicates to create a local scene
+        viewingMode: "local",
+        // Use the exent defined in clippingArea to define the bounds of the scene
+        clippingArea: appConfig.defaultExtent,
+        extent: appConfig.defaultExtent,
+        // Allows for navigating the camera below the surface
+        constraints: {
+          collision: {
+            enabled: false
+          },
+          tilt: {
+            max: 179.99
+          }
+        },
+        // Turns off atmosphere and stars settings
+        environment: {
+          atmosphere: null,
+          starsEnabled: false
+        }
+      });
+	  
+	  // Define the action handler in the sceneView popup 
+	  sceneView.popup.on("trigger-action", function(evt) {
+        if (evt.action.id === "add-comment-well") {
+		  console.debug("add-comment-well"); 
+		} else if (evt.action.id === "edit-comment-well") {
+		  console.debug("edit-comment-well");
+        } else {
+          return;
+        }
+      });
+	  
+	});
+  </script>
+</head>
+
+<body>
+  <div id="mapViewDiv"></div>
+  <div id="sceneViewDiv"></div>
+</body>
+</html>
