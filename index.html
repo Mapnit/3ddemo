@@ -57,6 +57,9 @@
       "esri/symbols/PointSymbol3D",
 	  "esri/symbols/PathSymbol3DLayer",
 	  "esri/symbols/LineSymbol3D", 
+	  "esri/symbols/TextSymbol3DLayer", 
+	  "esri/symbols/LabelSymbol3D", 
+	  "esri/layers/support/LabelClass", 
       
 	  "esri/widgets/Compass",
 	  "esri/widgets/Home",
@@ -74,7 +77,7 @@
 		FeatureLayer, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, 
 		ObjectSymbol3DLayer, IconSymbol3DLayer, PointSymbol3D, 
 		PathSymbol3DLayer, LineSymbol3D, 
-		Compass, Home, Search, on, dom, domConstruct, domStyle, all) {
+		TextSymbol3DLayer, LabelSymbol3D, LabelClass, 
 		Compass, Home, Search, on, dom, domConstruct, domClass, domStyle, all) {
 	  
 	  // Define the Popup Template for surface well
@@ -295,6 +298,20 @@
         }
       });
 	  
+	  var wellsLabelClass = new LabelClass({
+	    labelExpressionInfo: {
+		  //value: "{DEPTH}m, by {COMPLETION}"  // Text for labels 
+		  value: "{DEPTH}m"
+	    },
+		labelPlacement: "below-center",
+	    symbol: new LabelSymbol3D({
+		  symbolLayers: [new TextSymbol3DLayer({
+		    material: { color: [49,163,84] },
+		    size: 12  // Defined in points
+		  })]
+	    })
+	  });
+	  
 	  // Define Renderer for symbolizing wells below the surface
 	  var wellsDepthRenderer = new SimpleRenderer({
         symbol: new PointSymbol3D({
@@ -343,6 +360,8 @@
         url: appConfig.wellsUrl,
         definitionExpression: appConfig.wellsDataFilterExpr,
         outFields: ["*"],
+		labelsVisible: true,
+		labelingInfo: [ wellsLabelClass ], 
         popupTemplate: wellsTemplate,
         renderer: wellsDepthRenderer,
 		returnZ: true,
