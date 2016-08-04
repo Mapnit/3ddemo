@@ -32,7 +32,7 @@ var appConfig = {
           "<b>Name: </b> {wellname}<br>" +
 		  "<b>Wellbore:</b> {wellboreindex}<br>" + 
           "<b>MD: </b> {md} m<br>" +
-          "<b>Depth: </b> {dz} m<br>",
+          "<b>TD: </b> {td} m<br>",
 		  
 	  // Well data filtering expression
 	  wellsDataFilterExpr: null
