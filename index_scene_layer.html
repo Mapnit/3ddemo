@@ -23,6 +23,8 @@
       "esri/Map",
       "esri/views/SceneView",
       "esri/layers/SceneLayer",
+	  "esri/Ground", 
+	  "esri/layers/ElevationLayer", 	  
 	  "esri/layers/FeatureLayer",
       "esri/renderers/SimpleRenderer",
       "esri/symbols/LineSymbol3D",
@@ -31,12 +33,19 @@
       "esri/core/watchUtils",
 
       "dojo/domReady!"
-    ], function(Map, SceneView, SceneLayer, FeatureLayer, SimpleRenderer, LineSymbol3D, PathSymbol3DLayer, watchUtils) {
+    ], function(Map, SceneView, SceneLayer, Ground, ElevationLayer, FeatureLayer, SimpleRenderer, LineSymbol3D, PathSymbol3DLayer, watchUtils) {
 
+	  var worldElevation = ElevationLayer({
+		url: "//elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+	  });
+	  
       // Create Map
       var map = new Map({
-        basemap: "dark-gray",
-        ground: "world-elevation"
+        basemap: "topo",
+        // ground: "world-elevation"
+		ground: new Ground({
+		  layers: [ worldElevation ]
+		})
       });
 
       // Create the SceneView
