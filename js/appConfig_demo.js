@@ -28,15 +28,15 @@ var appConfig = {
           "<b>Completed: </b> {COMP_DATE}<br>" +
 		  "<b>Basin: </b> {BASIN}<br>" +
           "<b>Field: </b> {FIELD}<br>" +
-          "<b>Elevation: </b> {ELEV} m<br>",
+          "<b>Elevation: </b> {ELEV} ft<br>",
 	
 	  // popupTemplate content for wells
 	  wellBoresPopupTemplateContent: 
 		  "<b>API No.:</b> {wellboreapi}<br>" +
           "<b>Name: </b> {wellname}<br>" +
-		  "<b>Wellbore:</b> {wellboreindex}<br>" + 
-          "<b>MD: </b> {md} m<br>" +
-          "<b>TD: </b> {td} m<br>",
+		  "<b>Wellbore No.:</b> {wellboreindex}<br>" + 
+          "<b>Measured Depth: </b> {md} ft<br>" +
+          "<b>Total Depth: </b> {td} ft<br>",
 		  
 	  // Well data filtering expression
 	  wellsDataFilterExpr: null
