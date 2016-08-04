@@ -24,6 +24,8 @@ var appConfig = {
           "<b>Name: </b> {CWN}<br>" +
           "<b>Lease: </b> {LEASE}<br>" +
           "<b>Operator: </b> {OPERATOR}<br>" +
+		  "<b>Status: </b> {ST}<br>" +
+		  "<b>Class: </b> {CL}<br>" +
           "<b>Drilled: </b> {SPUD}<br>" +
           "<b>Completed: </b> {COMP_DATE}<br>" +
 		  "<b>Basin: </b> {BASIN}<br>" +
