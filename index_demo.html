@@ -442,8 +442,8 @@
 		  wellBoresSurfaceLyr2D.definitionExpression = null;
 		  wellBoresDepthLyr.definitionExpression = null;		
 		} else if (evt.target.value === "selected") {
-		  wellBoresSurfaceLyr2D.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
-		  wellBoresDepthLyr.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
+		  wellBoresSurfaceLyr2D.definitionExpression = "WellName = '" + selectedWell.attributes["number"] + "'";
+		  wellBoresDepthLyr.definitionExpression = "WellName = '" + selectedWell.attributes["number"] + "'";
 		}
 	  }); 
 	  
@@ -523,8 +523,8 @@
 		  selectedWell = f; 
 		  console.debug("show-subsurface-view: " + f.geometry); 
 		  // filter out the WellboresDepthLyr
-		  wellBoresSurfaceLyr2D.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
-		  wellBoresDepthLyr.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
+		  wellBoresSurfaceLyr2D.definitionExpression = "WellName = '" + f.attributes["number"] + "'";
+		  wellBoresDepthLyr.definitionExpression = "WellName = '" + f.attributes["number"] + "'";
 		  dom.byId("wellDisplay_Selected").checked = true; 
 		  //
 		  // highlight features

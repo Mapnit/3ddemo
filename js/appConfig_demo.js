@@ -21,7 +21,7 @@ var appConfig = {
 	  // popupTemplate content for well heads
 	  wellHeadsPopupTemplateContent: 
 		  "<b>API No.:</b> {API}<br>" +
-          "<b>Name: </b> {CWN}<br>" +
+          "<b>Name: </b> {NUMBER}<br>" +
           "<b>Lease: </b> {LEASE}<br>" +
           "<b>Operator: </b> {OPERATOR}<br>" +
 		  "<b>Status: </b> {ST}<br>" +
