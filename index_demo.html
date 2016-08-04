@@ -220,6 +220,23 @@
         }
       });
 	  
+	  mapView.then(function() {
+	    mapView.goTo({
+		/* //WHY not working???
+	      taget: { // autocasts as new Point()
+		    x: 801915.6999686807, 
+		    y: 955012.1999741122, 
+		    spatialReference: { // autocasts as new SpatialReference()
+              wkid: 32056
+            }
+		  },
+		*/
+		  center: [-97, 38], 
+	      zoom: 5
+	    })
+	  });
+	  
+	  // Define the labels for the scene view
 	  var wellsLabelClass = new LabelClass({
 	    labelExpressionInfo: {
 		  //value: "{DEPTH}m, by {COMPLETION}"  // Text for labels 
