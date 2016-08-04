@@ -2,10 +2,12 @@ var appConfig = {
 	  // Define the feature layer URLs
       WellHeadsUrl: 
 	    // "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/SampleRMOTCWellHeads/FeatureServer/0",  
-		"//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/RMOTCWellHeads3/FeatureServer/0", 
+		// "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/RMOTCWellHeads3/FeatureServer/0", 
+		"//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/RMOTCWellHeads4/FeatureServer/0",
 	  WellBoresUrl: 
 	    // "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/SampleRMOTCWellBores1/FeatureServer/0",
 		"//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/RMOTCWellBores3/FeatureServer/0",
+		// "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/RMOTCWellBores4/FeatureServer/0",
 	  
 	  // The initial clipping extent for the scene view
       defaultExtent: { // autocasts as new Extent()
