@@ -1,11 +1,7 @@
 var appConfig = {
 	  // Define the feature layer URLs
-      WellHeadsUrl: 
-	    // "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/SampleRMOTCWellHeads/FeatureServer/0",  
-		"//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/RMOTCWellHeads3/FeatureServer/0", 
-	  WellBoresUrl: 
-	    // "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/SampleRMOTCWellBores1/FeatureServer/0",
-		"//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/RMOTCWellBores3/FeatureServer/0",
+      WellHeadsUrl: "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/SampleRMOTCWellHeads/FeatureServer/0",  
+	  WellBoresUrl: "//gisportal02.logicsolutionsgroup.com/agsservices/rest/services/Hosted/SampleRMOTCWellBores1/FeatureServer/0",
 	  
 	  // The initial clipping extent for the scene view
       defaultExtent: { // autocasts as new Extent()
@@ -36,7 +32,7 @@ var appConfig = {
           "<b>Name: </b> {wellname}<br>" +
 		  "<b>Wellbore:</b> {wellboreindex}<br>" + 
           "<b>MD: </b> {md} m<br>" +
-          "<b>TD: </b> {td} m<br>",
+          "<b>Depth: </b> {dz} m<br>",
 		  
 	  // Well data filtering expression
 	  wellsDataFilterExpr: null
