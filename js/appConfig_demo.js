@@ -34,11 +34,11 @@ var appConfig = {
 	
 	  // popupTemplate content for wells
 	  wellBoresPopupTemplateContent: 
-		  "<b>API No.:</b> {wellboreapi}<br>" +
-          "<b>Name: </b> {wellname}<br>" +
-		  "<b>Wellbore No.:</b> {wellboreindex}<br>" + 
-          "<b>Measured Depth: </b> {md} ft<br>" +
-          "<b>Total Depth: </b> {td} ft<br>",
+		  "<b>API No.:</b> {WellAPI}<br>" +
+          "<b>Name: </b> {WellName}<br>" +
+		  "<b>Wellbore No.:</b> {WellboreIndex}<br>" + 
+          "<b>Measured Depth: </b> {MD} ft<br>" +
+          "<b>Total Depth: </b> {TD} ft<br>",
 		  
 	  // Well data filtering expression
 	  wellsDataFilterExpr: null
