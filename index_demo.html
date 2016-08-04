@@ -28,6 +28,14 @@
 	  cursor: pointer; 
 	}
 	
+	#wellDisplaySelect {
+	  background-color: white;
+	  padding: 10px; 
+	  font-size: 14px; 
+	  font-family: "Avenir Next W00","Helvetica Neue",Helvetica,Arial,sans-serif;
+	  line-height: 1.3em; 
+	}
+	
   </style>
 
   <link rel="stylesheet" href="//js.arcgis.com/4.0/esri/css/main.css">
@@ -36,6 +44,9 @@
   <script src="js/appConfig_demo.js"></script>
 
   <script>
+	// selected well feature
+	var selectedWell = null;
+	  
     require([
       "esri/Map",
       "esri/views/SceneView",
@@ -320,7 +331,6 @@
 	  // Define a layer for drawing the exact location of quakes below the surface
 	  var wellBoresDepthLyr = new FeatureLayer({
 		url: appConfig.WellBoresUrl,
-		//definitionExpression: "dhorizontal > 0",
 		outFields: ["*"],
 		labelsVisible: true,
 		labelingInfo: [ wellsLabelClass ], 
@@ -348,7 +358,6 @@
 	  // Defines a layer for depicting quakes on the surface
 	  var wellBoresSurfaceLyr2D = new FeatureLayer({
 		url: appConfig.WellBoresUrl,
-		definitionExpression: "dhorizontal > 0",
 		outFields: ["*"],
 		renderer: wellBoresSurfaceRenderer2D,
 		popupTemplate: wellBoresTemplate,
@@ -418,7 +427,26 @@
 	  
 	  on(close3dMap, "click", function(evt) {
 		domStyle.set("sceneViewDiv", "visibility", "hidden");
-	  });  
+	  }); 
+	  
+	  // Add the change event handle on wellDisplaySelect 
+	  var wellDisplaySelect = dom.byId("wellDisplaySelect"); 
+	  
+	  on(wellDisplaySelect, "change", function(evt) {
+		console.debug("wellDisplaySelect changed "); 
+		if (evt.target.value === "nearby") {
+		  wellBoresSurfaceLyr2D.definitionExpression = null;
+		  wellBoresDepthLyr.definitionExpression = null;		
+		} else if (evt.target.value === "selected") {
+		  wellBoresSurfaceLyr2D.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
+		  wellBoresDepthLyr.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
+		}
+	  }); 
+	  
+	  // Add the wellDisplaySelect div to the bottom right corner of the view
+	  sceneView.ui.add(wellDisplaySelect, {
+		position: "bottom-right"
+	  });
 	  
 	  // Highlight well on the map view
 	  function highlightWellOnMapView(f, mapView) {
@@ -483,7 +511,13 @@
 	  // Set the scene view to the passed feature
 	  function showDeviationView(f) {
 		if (f) {
+		  selectedWell = f; 
 		  console.debug("show-subsurface-view: " + f.geometry); 
+		  // filter out the WellboresDepthLyr
+		  wellBoresSurfaceLyr2D.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
+		  wellBoresDepthLyr.definitionExpression = "wellname = '" + f.attributes["cwn"] + "'";
+		  dom.byId("wellDisplay_Selected").checked = true; 
+		  //
 		  // highlight features
 		  //highlightWellOnSceneView(f, sceneView); 
 		  highlightWellOnMapView(f, mapView); 
@@ -511,5 +545,9 @@
 <body>
   <div id="mapViewDiv"></div>
   <div id="sceneViewDiv"></div>
+  <div id="wellDisplaySelect">
+    <input type="radio" name="wellDisplay" id="wellDisplay_Nearby" value="nearby"><b>Nearby Well(s)</b><br/>
+	<input type="radio" name="wellDisplay" id="wellDisplay_Selected" value="selected" checked><b>Selected Well</b><br/>
+  </div>
 </body>
 </html>
